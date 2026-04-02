@@ -14,19 +14,18 @@
 
 .hero-inner {
     max-width: 540px;
+    margin: 0 auto;
+    text-align: center;
 }
 
 .hero-badge {
     display: inline-flex;
+
+.hero-actions {
+    display: flex;
+    gap: 0.875rem;
     align-items: center;
-    gap: 0.5rem;
-    background: #e0f2f1;
-    color: #00695c;
-    font-size: 0.8rem;
-    font-weight: 500;
-    padding: 0.4rem 0.9rem;
-    border-radius: 999px;
-    margin-bottom: 1.5rem;
+    justify-content: center;
 }
 
 .badge-dot {
@@ -62,6 +61,7 @@
     display: flex;
     gap: 0.875rem;
     align-items: center;
+    justify-content: center;
 }
 
 .btn-primary {
@@ -221,16 +221,11 @@
 @media (max-width: 900px) {
     .hero {
         grid-template-columns: 1fr;
-        text-align: center;
         gap: 3rem;
     }
 
     .hero-inner {
-        max-width: 100%;
-    }
-
-    .hero-subtitle {
-        max-width: 100%;
+        max-width: 480px;
     }
 
     .hero-actions {
