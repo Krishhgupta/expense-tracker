@@ -99,4 +99,61 @@
     </div>
 </section>
 
+<!-- Video Modal -->
+<div class="modal-overlay" id="videoModal">
+    <div class="modal-container">
+        <button class="modal-close" id="modalClose">&times;</button>
+        <div class="modal-content">
+            <div class="video-wrapper">
+                <iframe id="videoFrame" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function() {
+    const modal = document.getElementById('videoModal');
+    const trigger = document.querySelector('.btn-secondary');
+    const closeBtn = document.getElementById('modalClose');
+    const videoFrame = document.getElementById('videoFrame');
+    const videoUrl = 'https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1';
+
+    function openModal() {
+        videoFrame.src = videoUrl;
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+        videoFrame.src = '';
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+
+    if (trigger) {
+        trigger.addEventListener('click', function(e) {
+            e.preventDefault();
+            openModal();
+        });
+    }
+
+    closeBtn.addEventListener('click', closeModal);
+
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            closeModal();
+        }
+    });
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && modal.classList.contains('active')) {
+            closeModal();
+        }
+    });
+})();
+</script>
 {% endblock %}
