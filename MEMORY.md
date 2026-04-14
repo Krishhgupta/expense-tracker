@@ -1,0 +1,1 @@
+- [Currency Preference](memory/currency_preference.md) — Use INR (₹) for all monetary values
