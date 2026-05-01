@@ -17,66 +17,76 @@ Implement user registration so new visitors can create a Spendly account. This s
   form, insert user, redirect to `/login` –
   public
 
-## Implementation Details
 
-### Registration Form
+## Database changes 
+No new tables or columns. The existing `users` table (id, name, email, password_hash, created_at) covers all requirements.
 
-The `templates/register.html` file already exists. It should include:
-- Form with POST method to `/register`
-- Fields: name, email, password
-- CSRF protection (Flask's built-in protection or manual token)
-- Display error messages for validation failures
-- Link to login page for existing users
+A new DB helper must be added to `database/db.py`:
 
-### Backend Logic (app.py)
+ — `create_user(name, email, password)` —
+hashes the password with `werkzeug`,
+inserts a row into `users`, returns the new
+user's `id`. Raises `sqlite3.IntegrityError`
+if the email is already taken (UNIQUE constraint).
 
-The `/register` route needs to handle both GET and POST:
+## Templates
+ — **Modify**: `templates/register.html`
+  - Change the form `action` to `url_for('register')` with `method="post"`
+  - Add `name` attributes to all inputs:
+  `name`, `email`, `password`, `confirm_password`
+  - Add a block to display a flash error message 
+  (e.g. "Email already registered", "Passwords do not match")
+  - Keep all existing visual design
 
-**GET**: Render the registration template
+## Files to change
+- `app.py` — upgrade `register()` to handle `GET` and `POST`; add flash + redirect logic
+- `database/db.py` — add `create_user()` helper 
+`templates/register.html` — wire up form action/method and flash message display
 
-**POST**:
-1. Extract form data (name, email, password)
-2. Validate:
-   - All fields are non-empty
-   - Email format is valid
-   - Password meets minimum length (e.g., 6 characters)
-3. Check if email already exists in database
-4. Hash password using `werkzeug.security.generate_password_hash`
-5. Insert new user into database
-6. Redirect to login page on success
-7. Re-render form with error messages on failure
+## Files to create
+None.
 
-### Database Query
+## New dependencies
+No new dependencies. Uses `werkzeug.security` (already installed) and Flask's built-in `flash` / `redirect` / `url_for`.
 
-Use parameterized query to insert new user:
-```python
-cursor.execute(
-    "INSERT INTO users (name, email, password_hash) VALUES (?, ?, ?)",
-    (name, email, password_hash)
-)
-```
+## Rules for implementation
+- No SQLAlchemy or ORMs
+- Parameterised queries only — never use f-strings in SQL
+- Hash passwords with `werkzeug.security.generate_password_hash` — never store plaintext
+- `app.secret_key` must be set in `app.py` for `flash()` to work (use a hardcoded dev string for now)
 
-Handle `sqlite3.IntegrityError` for duplicate email addresses.
+- Server-side validation must check:
+  1. All fields are non-empty
+  2. `password == confirm_password`
+  3. Email is not already registered (catch `sqlite3.IntegrityError`)
 
-## Constraints
+- On any validation failure, re-render the form with a flashed error message — do not redirect
+- On success, `flash` a success message and `redirect` to `url_for('login')`
+- Use `abort(405)` if an unsupported HTTP method reaches the route
+- All templates extend `base.html`
+- Use CSS variables — never hardcode hex values
+- Use `url_for()` for every internal link — never hardcode URLs
 
-- No SQLAlchemy or ORMs - use raw SQLite with parameterized queries only
-- Passwords must be hashed with `werkzeug.security.generate_password_hash`
-- Use CSS variables for styling - never hardcoded hex values
-- All templates must extend `base.html`
-- Email uniqueness enforced by database constraint
+## Definition of done
+- [ ] `GET /register` renders the registration form without errors
+- [ ] Submitting the form with all valid fields creates a new user in `users` and redirects to `/login`
+- [ ] Submitting with mismatched passwords re-renders the form with an error message, no DB insert
+- [ ] Submitting with an already-registered email re-renders the form with "Email already registered" error
+- [ ] Submitting with any empty field re-renders the form with a validation error
+- [ ] Password is stored as a hash — never plaintext — verifiable by inspecting `spendly.db`
+- [ ] No duplicate user is created on repeated valid submissions with the same email
 
-## Definition of Done
 
-- [ ] GET /register displays the registration form
-- [ ] Form includes name, email, and password fields
-- [ ] POST /register validates all fields are non-empty
-- [ ] Email format is validated
-- [ ] Password minimum length is enforced
-- [ ] Duplicate email addresses are rejected with user-friendly error
-- [ ] Password is hashed before storage
-- [ ] New user is inserted into database successfully
-- [ ] Successful registration redirects to login page
-- [ ] Errors are displayed on the registration form
-- [ ] Registration page links to login page
-- [ ] All SQL queries use parameterized statements
+
+
+
+
+
+
+
+
+
+
+
+
+
